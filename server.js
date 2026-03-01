@@ -10,9 +10,13 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+
+
 // เชื่อมต่อ Routes ให้ตรงกับชื่อไฟล์ในรูป
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/reservations', require('./routes/reservation'));
+const massageShops = require('./routes/massage');
+app.use('/api/v1/massageshops', massageShops);
 
 const PORT = process.env.PORT || 5003;
 app.listen(PORT, console.log(`Server running on port ${PORT}`));
