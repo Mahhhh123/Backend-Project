@@ -11,19 +11,19 @@ exports.getReservations = async (req, res, next) => {
     if (req.user.role !== 'admin') {
         query = Reservation.find({ user: req.user.id }).populate({
             path: 'massageShop',
-            select: 'name address tel'
+            select: 'name address tel openTime closeTime'
         });
     } else { // If you are an admin, you can see all reservations!
         if (req.params.massageShopId) {
             console.log(req.params.massageShopId);
             query = Reservation.find({ massageShop: req.params.massageShopId }).populate({
                 path: "massageShop",
-                select: "name address tel",
+                select: "name address tel openTime closeTime",
             });
         } else {
             query = Reservation.find().populate({
                 path: 'massageShop',
-                select: 'name address tel'
+                select: 'name address tel openTime closeTime'
             });
         }
     }
@@ -47,18 +47,28 @@ exports.getReservations = async (req, res, next) => {
 
 // @desc    Get single reservation
 // @route   GET /api/v1/reservations/:id
-// @access  Public
+// @access  Private
 exports.getReservation = async (req, res, next) => {
     try {
         const reservation = await Reservation.findById(req.params.id).populate({
             path: 'massageShop',
-            select: 'name address tel' 
+            select: 'name address tel openTime closeTime' 
         });
 
         if (!reservation) {
             return res.status(404).json({
                 success: false,
                 message: `No reservation with the id of ${req.params.id}`
+            });
+        }
+
+        if (
+            reservation.user.toString() !== req.user.id &&
+            req.user.role !== 'admin'
+        ) {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authorized to access this reservation'
             });
         }
 
